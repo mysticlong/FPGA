@@ -1,5 +1,5 @@
-`include "src/mux2to1_nbit.sv"
-`include "src/dff_nbit.sv"
+`include "src/library/mux2to1_nbit.sv"
+`include "src/library/dff_nbit.sv"
 
 module kiemtra(f_i,F_i,rst_i,clk_i,f_o);
 input logic f_i,F_i,rst_i,clk_i;
