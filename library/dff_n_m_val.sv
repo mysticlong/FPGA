@@ -1,4 +1,4 @@
-`include "src/library/mux2to1_nbit_m.sv"
+`include "src/library/mux2to1_n_m.sv"
 module dff_n_m_val#(parameter n=4,m=16,[n-1:0]val='0)(In_i,rst_i,clk_i,In_o);
 	input logic [n-1:0] In_i[0:m-1];
 	input logic	rst_i,clk_i;
@@ -13,5 +13,5 @@ module dff_n_m_val#(parameter n=4,m=16,[n-1:0]val='0)(In_i,rst_i,clk_i,In_o);
 	else
 		In_io <= In_i;
 	end
-	mux2to1_nbit_m#(n,m) in_o(Val,In_io,rst_i,In_o);
+	mux2to1_n_m#(n,m) in_o(Val,In_io,rst_i,In_o);
 endmodule:dff_n_m_val
