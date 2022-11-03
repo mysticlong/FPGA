@@ -17,12 +17,12 @@ module multi_16to16(A_i,B_i,fl_i,rst_i,clk_i,Y_o,fl_o);
     assign a_io[i] =Q[i]&A_io[i];
 	assign fl_mul_o=(c_o==a_io)?0:1; 	//nhân xong
 	// đồng bộ ngõ vào
-	   dff_n_m#(1,16) A_io_arr(A_i,rst_i,rst_i,A_io); //data0
-	   dff_n_m#(1,16) B_io_arr(B_i,rst_i,rst_i,b_io); //data1 
+	   dff_n_m#(1,16) A_io_arr(A_i,rst_i,fl_i,A_io); //data0
+	   dff_n_m#(1,16) B_io_arr(B_i,rst_i,fl_i,b_io); //data1 
 	//flag out
-	mux2to1_n#(1) Fl_o(0,fl_i,fl_mul_o,fl_o);
+	mux2to1_n#(1) Fl_o(0,1,fl_mul_o,fl_o);
 	// dong bo xung clock
-	  dff_n_val#(1,0) Clk_o(clk_i,rst_i,rst_i,clk_o);
+	mux2to1_n#(1) Clk_o(0,clk_i,fl_i,clk_o);
    //a_io=0 khi gán xong
 	  dff_n_m_val#(1,16,1) Q_o(D,rst_i,clk_o,Q); //dich bit
 	   //gán lần lượt a_io
