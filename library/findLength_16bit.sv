@@ -1,4 +1,3 @@
-//`include "src/library/mux2to1_n.sv"
 `include "src/library/dff_n_val.sv"
 `include "src/library/dff_n_m.sv"
 module findLength_16bit(data_i,rst_i,clk_i,i_o,fl_o);

@@ -3,7 +3,6 @@
 `include "src/library/dff_n_val.sv"
 `include "src/library/dff_n_m.sv"
 `include "src/library/dff_n_m_val.sv"
-`include "src/library/mux2to1_n.sv"
 module multi_16to16(data0_i,data1_i,rst_i,clk_i,Y_o,fl_o);
 	input logic data0_i[0:15],data1_i[0:15],clk_i,rst_i;
 	output logic Y_o[0:15],fl_o;

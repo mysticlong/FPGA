@@ -1,8 +1,8 @@
 `include "src/library/mux2to1_n.sv"
 `include "src/library/dff_n_val.sv"
 
-module kiemtra(fl_ref,fl_check_i,rst_i,clk_i,f_check_o);
-input logic fl_ref,rst_i,clk_i,fl_check_i;
+module kiemtra(fl_ref,rst_i,clk_i,f_check_o);
+input logic fl_ref,clk_i,fl_check_i;
 output logic f_check_o;
 logic clk_o,f_oi;
 //dong bo xung clock
