@@ -1,12 +1,11 @@
-
-module FA_1bit_m#(m=16)(D0_i,D1_i,carry_i,sum_o,carry_o);
-	input logic D0_i[0:m-1],D1_i[0:m-1],carry_i[0:m-1];
+module FA_1bit_m#(parameter m=16)(data0_i,data1_i,carry_i,sum_o,carry_o);
+	input logic data0_i[0:m-1],data1_i[0:m-1],carry_i[0:m-1];
 	output logic sum_o[0:m-1],carry_o[0:m-1];
-initial begin
-int i=0;
-	for(i=0;i<m;i++)	begin
-			sum_o[i]=((D0_i[i]^D1_i[i])^carry_i[i]);
-			carry_o[i] =((D0_i[i]^D1_i[i])&carry_i[i])|(D0_i[i]&D1_i[i]);
+	int val=m,i=0;
+	always_comb begin:ok
+	for(i=0;i<val;i++)	begin
+			sum_o[i]=((data0_i[i]^data1_i[i])^carry_i[i]);
+			carry_o[i] =((data0_i[i]^data1_i[i])&carry_i[i])|(data0_i[i]&data1_i[i]);
    end
  end
 	endmodule: FA_1bit_m
