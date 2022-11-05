@@ -15,10 +15,6 @@ module multi_16to16(data0_i,data1_i,rst_i,clk_i,Y_o,fl_o,X,A_io,a_io,i);
 	assign b[15]=0,b[0:14]=Y_o[1:15];
      assign a_io[i] =Q[i]&A_io[i];
 	assign fl_main=(c_o==Q)?1:0; 	//nhân xong
-
-//	 dff_n_val#(1,0) Fl_o(fl_main,rst_i,clk_i,fl_o);
-	 //dong bo rst
-//	  mux2to1_n#(1) Rst_o(1,rst_i,fl_o,rst_o);
 	// dong bo xung clock
 	mux2to1_n#(1) Clk_o(0,clk_i,rst_i,clk_o);
 	//flag out
@@ -37,5 +33,5 @@ module multi_16to16(data0_i,data1_i,rst_i,clk_i,Y_o,fl_o,X,A_io,a_io,i);
     //xuat ngõ ra
     dff_n_m_val#(1,16,0) C_i(c_o,rst_i,clk_o,c_i); //16 delay 1bit
     FA_1bit_m#(16) S(X,b,c_i,s,c_o);  //16 bộ cộng 1 bit
-    dff_n_m#(1,16) y_o(s,rst_i,clk_o,Y_o);//16 delay 1bit
+    dff_n_m#(1,16) y_o(s,rst_i,clk_o&~fl_o,Y_o);//16 delay 1bit
 endmodule:multi_16to16
