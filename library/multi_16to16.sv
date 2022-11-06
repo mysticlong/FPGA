@@ -3,6 +3,7 @@
 `include "src/library/dff_n_val.sv"
 `include "src/library/dff_n_m.sv"
 `include "src/library/dff_n_m_val.sv"
+`include "src/library/dff_n.sv"
 module multi_16to16(data0_i,data1_i,rst_i,clk_i,Y_o,fl_o,X,A_io,i);
 	input  logic data0_i[0:15],data1_i[0:15],clk_i,rst_i;
 	output logic Y_o[0:16],fl_o,X[0:15],A_io[0:15];
@@ -12,7 +13,7 @@ module multi_16to16(data0_i,data1_i,rst_i,clk_i,Y_o,fl_o,X,A_io,i);
  	logic fl_main,clk_o;//rst_o;
 	logic  A[0:15]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     assign D1[16]=D0[16],D0[16]=0,D1[0:15]=Q[1:16],D0[0:15]=A_io[0:15];
-	assign b[15]=0,b[0:14]=Y_o[1:15];
+	assign b[15]=0,b[0:14]=Y_o[2:16];
 	assign fl_main=(c_i==Q)?1:0; 	//nhân xong
 	// dong bo xung clock
 	mux2to1_n#(1) Clk_o(0,clk_i,rst_i,clk_o);
@@ -31,5 +32,6 @@ module multi_16to16(data0_i,data1_i,rst_i,clk_i,Y_o,fl_o,X,A_io,i);
     //xuat ngõ ra
     dff_n_m_val#(1,16,0) C_i(c_o,rst_i,clk_o,c_i); //16 delay 1bit
     FA_1bit_m#(16) S(X,b,c_i,s,c_o);  //16 bộ cộng 1 bit
-    dff_n_m#(1,16) y_o(s,rst_i,clk_o&~fl_o,Y_o);//16 delay 1bit
+    dff_n_m#(1,16) y_oi(s,rst_i,clk_o&~fl_o,Y_o[1:16]);//16 delay 1bit
+    dff_n#(1) y_o(Y_o[1],clk_o&~fl_o,Y_o[0]);//16 delay 1bit
 endmodule:multi_16to16
