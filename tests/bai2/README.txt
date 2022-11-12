@@ -1,6 +1,6 @@
 SETUP
 	1.tao thu muc:~./ex02$ mkdir src/library
-	2.$ cd src/libary
+	2.$ cd src/library
 	3.copy all file tren git(trung voi duong dan tren git) vao library
 	4.tao thu muc:~/src$ mkdr designs/bai2 
 	5.copy all file tren git(trung voi duong dan) vao thu muc bai2
