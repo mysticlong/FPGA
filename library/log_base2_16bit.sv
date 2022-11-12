@@ -1,16 +1,14 @@
 `include "src/library/peasant_multi_nxn.sv"
 `include "src/library/check.sv"
 `include "src/library/scale_32to16b.sv"
-//`include "src/library/dff_n_val.sv"
-`include "src/library/dff_n_m_val.sv"
-//`include "src/library/dff_n_m_data.sv"
-module log_base2_16bit(data0_i,rst_i,clk_i,fl_start,Ynguyen_o,Ythapphan_o,y_check,data_o,i,rst_mul,Ythapphan);
+`include "src/library/DffSync_n_data.sv"
+module log_base2_16bit(data0_i,rst_i,clk_i,fl_start,Ynguyen_o,Ythapphan_o,y_check,data_o,i,rst_mul,ytp_o);
 input logic [15:0]data0_i;
 input logic rst_i,clk_i;
-output logic fl_start,rst_mul,Ythapphan;
+output logic fl_start,rst_mul,ytp_o;
 output logic [3:0]Ynguyen_o,i;
 output logic [15:0] data_o;
-output logic Ythapphan_o[15:0];
+output logic [15:0]Ythapphan_o;
 output logic[31:0] y_check;
 logic[31:0] y_scale;
 logic[15:0] y_mul;
@@ -36,16 +34,11 @@ logic rst_scale,rst_check,rst_receive;
 //scale 
 	scale_32to16b Y_scale(y_scale,rst_scale,clk_o&fl_scale,rst_check,fl_check,y_check); 
 //check
-	check   En_receive(y_check,index,rst_check,clk_o&~fl_end&fl_check,rst_receive,y_mul,Ythapphan);
+	check   En_receive(y_check,index,rst_check,clk_o&~fl_end&fl_check,rst_receive,y_mul,ytp_o);
 //Y nguyen
 	dff_n#(4) Yng(index,fl_start,Ynguyen_o);
-//Y thap phan
-	//dich bit 
-	logic D[15:0]; 
-	always_comb begin:ok
-		 D[15:1]=Ythapphan_o[14:0];
-		 D[0]=Ythapphan;
-	end
-	dff_n_m_val#(1,15,0) Ytp_o(D,rst_i,rst_mul,Ythapphan_o);
+//rst Y_tp
+	//reg ytp_o;
+	 DffSync_n_data#(16,'0) Ytp_o(Ythapphan_o<<1,(Ythapphan_o<<1)+1,ytp_o,rst_i,~rst_mul,Ythapphan_o);
 endmodule: log_base2_16bit
 
