@@ -1,38 +1,45 @@
-`include "src/library/peasant_multi_nxn.sv"
-module log_base2_16bit#(parameter i=6)(data_i,rst_i,clk_i,fl_o,Ynguyen_o,Ythapphan_o);
-input logic [15:0]data_i;
-input logic rst_i,clk_i,fl_o;
-output logic[15:0] Ynguyen_o,Ythapphan_o;
-parameter n=16;
-logic[15:0] data_io;
-logic[31:0] y_o;
-logic fl_main,clk_o,fl_index,fl_mul,fl_mul_o,fl_total,fl,fl_check,fl_check_o,fl_shift,fl_shift_o;
-assign fl_main=(i==0)?1:0;
-//assign fl_index=(a0==0)?1:0;
+`include "src/designs/bai2/peasant_multi_nxn.sv"
+`include "src/designs/bai2/check.sv"
+`include "src/designs/bai2/scale_32to16b.sv"
+`include "src/library/DffSync_n_data.sv"
+module log_base2_16bit(data0_i,rst_i,clk_i,fl_end,Ynguyen_o,Ythapphan_o,y_check,data_in,index,rst_mul);
+input logic [15:0]data0_i;
+input logic rst_i,clk_i;
+output logic fl_end,rst_mul;
+output logic [3:0]Ynguyen_o,index;
+output logic [15:0] data_in;
+output logic [15:0]Ythapphan_o;
+output logic[31:0] y_check;
+logic[31:0] y_scale;
+logic[15:0] y_mul;
+logic[3:0] size,i;
+logic fl_main,clk_o,fl_start,fl_scale,fl_check,ytp_o;
+logic rst_scale,rst_check,rst_receive;
 //dong bo xung clock
 	mux2to1_n#(1) Clk_o(0,clk_i,rst_i,clk_o);
-//fl_total
-	dff_n_data#(1,0) Fl_total(fl,rst_i,clk_o,fl_total);
-	dff_n_data#(1,0) Fl_mul_o(fl_mul,rst_i,clk_o,fl_mul_o); 
-	dff_n_data#(1,0) Fl(fl_check_o|fl_shift_o,fl_mul_o,clk_o,fl);
-	dff_n_data#(1,1) Fl_check_o(fl_check,fl_mul_o,clk_o,fl_check_o);assign fl_check=(i==0)?0:1;
 //flag out
-	dff_n_data#(1,0) Fl_o(fl_main,rst_i,clk_i,fl_o);
-//rst_mul
-	dff_n_data#(1,0) Fl_mul(rst_mul,rst_i,clk_i,fl_mul_o);
+    assign fl_main=(i==0)?1:0;
+	dff_n_data#(1,0) Fl_end(fl_main,rst_i,clk_i,fl_end);
+// rst_receive
+	assign fl_start=(i==15)?0:1;
+	DffSync_n#(1)  Rst_receive(rst_i,rst_receive,fl_start,clk_i,rst_mul);
 //dong bo ngo vao
-	mux2to1_n#(n) A0(a,a1>>1,rst_i,a0);
-	dff_n#(n) A_o(a0,rst_i,clk_o,a1);
-//tim Ynguyen
-	dff_n_val#(4,0) Yng(Ynguyen_o+1,rst_i,clk_o&(a0==0)?0:1,Ynguyen_o);
+    DffSync_n#(16) Data_o(data0_i,y_mul,fl_start,~rst_mul,data_in);
+//lay 6 bit thap phan
+    dff_n_data#(4,15) I(i-1,rst_i,~rst_receive,i);
+// index
+	assign index=4'b1110-i;
 //x^2
-	mux2to1_n#(n) A0(a,y_oL,rst_i,a0);
-	peasant_multi_nxn#(16) Y_o(a0,a0,rst_mul,clk_o,fl_mul,y_o) ;
-// tim index
-	dff_n_val#(4,0) Index(index+1,rst_i,clk_o&~fl_mul,index);
-	assign fl_shift=((2*index+1)>15)?1:0;
-	dff_n_data#(4,1) Fl_shift_o(fl_shift,fl_mul_o,clk_o&fl_mul,fl_shift_o);
-	
-	
-endmodule: log2_x_16bit
+	peasant_multi_nxn#(16) Y_o(data_in,data_in,rst_mul,clk_o,rst_scale,fl_scale,y_scale);//tinh xong fl_scale=1
+    //tim size
+	dff_n_data#(4,0) Size(size+1,rst_mul,clk_o&~fl_scale,size);	
+//scale 
+	scale_32to16b Y_scale(y_scale,rst_scale,clk_o&fl_scale,rst_check,fl_check,y_check); 
+//check
+	check   En_receive(y_check,size,rst_check,clk_o&~fl_end&fl_check,rst_receive,y_mul,ytp_o);
+//Y nguyen
+	dff_n#(4) Yng(size,fl_start,Ynguyen_o);
+//y thap phan
+	 DffSync_n_data#(16,'0) Ytp_o(Ythapphan_o<<1,(Ythapphan_o<<1)+1,ytp_o,rst_i,~rst_mul,Ythapphan_o);
+endmodule: log_base2_16bit
 
