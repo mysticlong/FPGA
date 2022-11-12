@@ -5,8 +5,8 @@ module dff_n_val#(parameter b=4,[b-1:0]val='1)(data_i,rst_i,clk_i,data_o);
 	output logic[b-1:0]	data_o;
 	logic[b-1:0]	data_next;
 	always_ff@(posedge clk_i or negedge rst_i) begin
-		if(!rst_i) data_o<=val;
+		if(!rst_i) data_o<=data_o;
 		else data_o<=data_next;
 	end
- mux2to1_n#(b) Q_i(data_o,data_i,rst_i,data_next);
+ mux2to1_n#(b) Q_i(val,data_i,rst_i,data_next);
 endmodule:dff_n_val

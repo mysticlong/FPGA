@@ -24,5 +24,5 @@ assign fl_index=(index_o>4'b0111)?1:0;
 //y_o
     assign y_o=y_i[15:0];
 //y thap phan
-    mux2to1_n#(1) Ytp_o(y_o[(index_o<<1)+1],y_o[14],fl_index_o,ytp_o);
+    DffSync_n#(1) Ytp_o(y_o[(index_o<<1)+1],(data0_i==y_i)?0:1,fl_index_o,rst_o,ytp_o);
 endmodule: check
