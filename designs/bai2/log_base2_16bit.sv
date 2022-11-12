@@ -25,7 +25,7 @@ logic rst_scale,rst_check,rst_receive;
 	DffSync_n#(1)  Rst_receive(rst_i,rst_receive,fl_start,clk_i,rst_mul);
 //dong bo ngo vao
     DffSync_n#(16) Data_o(data0_i,y_mul,fl_start,~rst_mul,data_in);
-//lay 6 bit thap phan
+//lay 15 bit thap phan
     dff_n_data#(4,15) I(i-1,rst_i,~rst_receive,i);
 // index
 	assign index=4'b1110-i;
