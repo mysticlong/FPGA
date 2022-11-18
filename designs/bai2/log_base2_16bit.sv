@@ -42,4 +42,3 @@ logic rst_scale,rst_check,rst_receive;
 //y thap phan
 	 DffSync_n_data#(16,'0) Ytp_o(Ythapphan_o<<1,(Ythapphan_o<<1)+1,ytp_o,rst_i,~rst_mul,Ythapphan_o);
 endmodule: log_base2_16bit
-

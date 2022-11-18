@@ -7,7 +7,7 @@ output logic fl_o,rst_o;
 logic fl_main,clk_o,rst;
 logic [2*n-1:0] b0,b1,x,b;	
 logic [n-1:0] a0,a1;
-assign x=a0[0]?b0:0,b={16'b0,data1_i};
+assign x=a0[0]?b0:0,b[n-1:0]=data1_i,b[2*n-1:n]=0; 
 assign fl_main=(a0==0)?1:0;
 //dong bo xung clock
 	mux2to1_n#(1) Clk_o(0,clk_i,rst_i,clk_o);
