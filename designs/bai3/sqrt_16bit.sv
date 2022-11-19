@@ -3,8 +3,7 @@
 module sqrt_16bit#(parameter n=16,digit=32) (data0_i,data1_i,rst_i,clk_i,fl_o,yint_o,ydec_o,x,y_d,x_o,rst_sqrt);
 input logic[n-1:0] data0_i,data1_i;
 input logic rst_i,clk_i;
-output logic [2*n:0] yint_o;
-output logic [2*n:0] x;
+output logic [2*n:0] yint_o,x;
 output logic [digit-1:0] ydec_o;
 output logic fl_o,rst_sqrt;
 output logic [2*n+digit:0] x_o,y_d;
@@ -12,7 +11,7 @@ logic [2*n-1:0] y_mul0,y_mul1;
 logic fl_mul0,fl_mul1,fl_mul,fl_main,fl_d;
 logic rst_mul0,rst_mul1,rst_mul,rst_d;
 //fl_main
-	assign fl_main=(y_d[2*n+digit:0]==x_o[2*n+digit:0])?1:0;
+	assign fl_main=(y_d==x_o)?1:0;
 	dff_n_data#(1,0) Fl_o(fl_main,rst_i,clk_i,fl_o);	//flag out
 //x^2+y^2=x
 	peasant_multi_nxn#(n) Y_mul0(data0_i,data0_i,rst_i,clk_i,rst_mul0,fl_mul0,y_mul0);
