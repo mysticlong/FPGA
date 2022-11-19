@@ -29,7 +29,7 @@ assign b[n-1+digit:0]=data1_i,b[n+3*digit-1:n+digit]=0;
 	//tim so du
 	mux2to1_n#(3*digit+n) A_i(data_o,data_o-(b_i<<i),fl_in,a_i);
     DffSync_n#(3*digit+n) Data_o(a,a_i,rst_i,clk_i&~fl_end,data_o);
-    //phan nguyen
+    //y_o=n.digit
      mux2to1_n#(1) Y_o(0,1,fl_in,y_o[i]);
 endmodule :division_n_digit
 
