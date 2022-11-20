@@ -2,12 +2,12 @@
 `include "src/library/DffSync_n.sv"
 `include "src/library/FA_1bit.sv"
 `include "src/library/dff_n_data.sv"
-module AddSerial_n#(parameter n=8)(data0_i,data1_i,rst_i,clk_i,fl_o,sum_o);
+module AddSerial_n#(parameter n=8)(data0_i,data1_i,rst_i,clk_i,fl_o,sum_o,Q1);
 input logic [n-1:0] data0_i,data1_i;
 input logic rst_i,clk_i;
 output logic fl_o;
-output logic [n:0] sum_o;
-logic [n:0] D0,D1,Q1;
+output logic [n:0] sum_o,Q1;
+logic [n:0] D0,D1;
 logic s_o,c_o,c_in,fl_main;
 logic [3:0]i;
 //fl_o
