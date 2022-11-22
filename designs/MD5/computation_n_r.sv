@@ -1,7 +1,5 @@
 `include "src/library/DffSync_n.sv"
-//`include "src/library/DffSync_n_data.sv"
 `include "src/library/dff_n_data.sv"
-//`include "src/library/dff_n_val.sv"
 module computation_n_r#(parameter n=32,round=0) (A_i,B_i,C_i,D_i,M_i,K_i,rst_i,clk_i,fl_o,rst_o,A_o,B_o,C_o,D_o);
 input logic [n-1:0] A_i,B_i,C_i,D_i;
 input logic rst_i,clk_i;
@@ -13,7 +11,7 @@ logic[3:0] i;
 logic [n-1:0] F0_o;
 logic [n:0] F_o;
 logic [n:0] F0,F1,F2,F3;
-logic [n-1:0] F1_o,F2_o,F3_o;
+logic [n-1:0] F1_o,F2_o,F3_o,M0[0:15];
 logic fl_main,rst,clk_o;
 logic [4:0] s0_i,s1_i,s2_i,s3_i,Fd,Fd_o;
 assign clk_o=clk_i&~fl_o;
@@ -23,17 +21,26 @@ always_comb begin:setup
 	  default: 	begin F_o = {1'b0,F0_o}+{1'b0,B_o};
 	  				  s0_i=7;s1_i=12;s2_i=17;s3_i=22; end
 	  1:		begin F_o = {1'b0,F1_o}+{1'b0,B_o};
-	  			      s0_i=5;s1_i=9;s2_i=14;s3_i=20; end
+	  			      s0_i=5;s1_i=9;s2_i=14;s3_i=20;
+	  			      M0[0]=M_i[1];M0[1]=M_i[6];M0[2]=M_i[11]; M0[3]=M_i[0]; M0[4]=M_i[5]; M0[5]=M_i[10];M0[6]=M_i[15];M0[7]=M_i[4];
+	  			      M0[8]=M_i[9];M0[9]=M_i[14];M0[10]=M_i[3];M0[11]=M_i[8];M0[12]=M_i[13];M0[13]=M_i[2];M0[14]=M_i[7];M0[15]=M_i[12];
+	  			       end
 	  2:		begin F_o = {1'b0,F2_o}+{1'b0,B_o};
-	  				  s0_i=4;s1_i=11;s2_i=16;s3_i=23; end
+	  				  s0_i=4;s1_i=11;s2_i=16;s3_i=23;
+	  				  M0[0]=M_i[5];M0[1]=M_i[8];M0[2]=M_i[11]; M0[3]=M_i[14]; M0[4]=M_i[1]; M0[5]=M_i[4];M0[6]=M_i[7];M0[7]=M_i[10];
+	  				  M0[8]=M_i[13];M0[9]=M_i[0];M0[10]=M_i[3];M0[11]=M_i[6];M0[12]=M_i[9];M0[13]=M_i[12];M0[14]=M_i[15];M0[15]=M_i[2];
+	  				   end
 	  3:		begin F_o = {1'b0,F3_o}+{1'b0,B_o};
-	  				  s0_i=6;s1_i=10;s2_i=15;s3_i=21; end
+	  				  s0_i=6;s1_i=10;s2_i=15;s3_i=21; 
+	  				  M0[0]=M_i[0];M0[1]=M_i[7];M0[2]=M_i[14]; M0[3]=M_i[5]; M0[4]=M_i[12]; M0[5]=M_i[3];M0[6]=M_i[10];M0[7]=M_i[1];
+	  				  M0[8]=M_i[8];M0[9]=M_i[15];M0[10]=M_i[6];M0[11]=M_i[13];M0[12]=M_i[4];M0[13]=M_i[11];M0[14]=M_i[2];M0[15]=M_i[9];
+	  				  end
      endcase
 end
 assign F0=({1'b0,A_o}+{1'b0,K_i[i]}+{1'b0,M_i[i]}+{1'b0,(B_o&C_o)|(~B_o&D_o)}), F0_o=(F0[n-1:0]<<s0)+(F0[n-1:0]>>(n-s0));
-assign F1=({1'b0,A_o}+{1'b0,K_i[i]}+{1'b0,M_i[i]}+{1'b0,(B_o&D_o)|(C_o&~D_o)}), F1_o=(F1[n-1:0]<<s0)+(F1[n-1:0]>>(n-s0));
-assign F2=({1'b0,A_o}+{1'b0,K_i[i]}+{1'b0,M_i[i]}+{1'b0,B_o^C_o^D_o}), 			F2_o=(F2[n-1:0]<<s0)+(F2[n-1:0]>>(n-s0));
-assign F3=({1'b0,A_o}+{1'b0,K_i[i]}+{1'b0,M_i[i]}+{1'b0,C_o^(B_o|~D_o)}),		F3_o=(F3[n-1:0]<<s0)+(F3[n-1:0]>>(n-s0));
+assign F1=({1'b0,A_o}+{1'b0,K_i[i]}+{1'b0,M0[i]}+{1'b0,(B_o&D_o)|(C_o&~D_o)}),  F1_o=(F1[n-1:0]<<s0)+(F1[n-1:0]>>(n-s0));
+assign F2=({1'b0,A_o}+{1'b0,K_i[i]}+{1'b0,M0[i]}+{1'b0,B_o^C_o^D_o}), 			F2_o=(F2[n-1:0]<<s0)+(F2[n-1:0]>>(n-s0));
+assign F3=({1'b0,A_o}+{1'b0,K_i[i]}+{1'b0,M0[i]}+{1'b0,C_o^(B_o|~D_o)}),		F3_o=(F3[n-1:0]<<s0)+(F3[n-1:0]>>(n-s0));
 //signal is not used
 	assign Fd={F0[n],F1[n],F2[n],F3[n],F_o[n]};
 	DffSync_n#(5) fd(Fd,Fd_o,rst_i,clk_i&~fl_o,Fd_o);
