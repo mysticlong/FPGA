@@ -1,5 +1,7 @@
 `include "src/library/DffSync_n.sv"
+//`include "src/library/DffSync_n_data.sv"
 `include "src/library/dff_n_data.sv"
+//`include "src/library/dff_n_val.sv"
 module computation_n_r#(parameter n=32,round=0) (A_i,B_i,C_i,D_i,M_i,K_i,rst_i,clk_i,fl_o,rst_o,A_o,B_o,C_o,D_o);
 input logic [n-1:0] A_i,B_i,C_i,D_i;
 input logic rst_i,clk_i;
@@ -36,12 +38,14 @@ assign F3=({1'b0,A_o}+{1'b0,K_i[i]}+{1'b0,M_i[i]}+{1'b0,C_o^(B_o|~D_o)}),		F3_o=
 	assign Fd={F0[n],F1[n],F2[n],F3[n],F_o[n]};
 	DffSync_n#(5) fd(Fd,Fd_o,rst_i,clk_i&~fl_o,Fd_o);
 //flag out
+	logic fl1;
 	assign fl_main=(i==15)?1:0; //fl_main
-	dff_n_data#(1,0) Fl_o(fl_main,rst_i,clk_i,fl_o);
+	dff_n_data#(1,0) Fl1(fl_main,rst_i,clk_i,fl1);
+	dff_n#(1) Fl_o(fl1,clk_i,fl_o);
 //rst out
 	dff_n#(1) Rst(fl_o,clk_i,rst);assign rst_o=rst|~fl_o;
 //i
-	dff_n_data#(4,0) I(i+1,rst_i,clk_i&~fl_o,i);
+	dff_n_data#(4,0) I(i+1,rst_i,clk_i&~fl1,i);
 //S>>1,select s0
 	logic [4:0] s1,s2,s3,s0;
 	DffSync_n#(5) S1(s0_i,s1,rst_i,clk_i&~fl_o,s0);
