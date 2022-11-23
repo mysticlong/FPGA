@@ -1,6 +1,6 @@
 `include "src/designs/MD5/computation_n_r.sv"
-module md5(M_i,rst_i,clk_i,rst_o,fl_o,fl1,hash_o,A1,B1,C1,D1,A2,B2,C2,D2,A3,B3,C3,D3,A4,B4,C4,D4);
-input logic [31:0] M_i[0:15];
+module md5(M_i,rst_i,clk_i,rst_o,fl_o,fl1,hash_o,A1,B1,C1,D1,A2,B2,C2,D2,A3,B3,C3,D3,A4,B4,C4,D4,M_io);
+input logic [31:0] M_i;
 input logic rst_i,clk_i;
 output logic fl_o,rst_o,fl1;
 output logic [127:0] hash_o;
@@ -15,34 +15,47 @@ output logic [127:0] hash_o;
 	assign K_i[40]=32'h289B7EC6,K_i[41]=32'hEAA127FA,K_i[42]=32'hD4EF3085,K_i[43]=32'h04881D05,K_i[44]=32'hD9D4D039,K_i[45]=32'hE6DB99E5,K_i[46]=32'h1FA27CF8,K_i[47]=32'hC4AC5665;
 	assign K_i[48]=32'hF4292244,K_i[49]=32'h432AFF97,K_i[50]=32'hAB9423A7,K_i[51]=32'hFC93A039,K_i[52]=32'h655B59C3,K_i[53]=32'h8F0CCC92,K_i[54]=32'hFFEFF47D,K_i[55]=32'h85845DD1;
 	assign K_i[56]=32'h6FA87E4F,K_i[57]=32'hFE2CE6E0,K_i[58]=32'hA3014314,K_i[59]=32'h4E0811A1,K_i[60]=32'hF7537E82,K_i[61]=32'hBD3AF235,K_i[62]=32'h2AD7D2BB,K_i[63]=32'hEB86D391;
-	//M_ii
+	//M_i
+	logic [511:0] M_i1;
+	assign M_i1[511:480]=M_i[31:0],M_i1[479:0]=480'hB0;
+    output	logic[31:0] M_io[0:15]; 	
+	genvar m;
+	generate
+	  	 for(m=0;m<16;m++) begin
+	  		assign	M_io[m]=M_i1[m*32+31:m*32];		  			
+	  		end
+	endgenerate
+	//initial A B C D 			      		
 	logic[31:0] A,B,C,D;
+ //	assign A=32'h01234567,B=32'h89abcdef,C=32'hfedcba98,D=32'h76543210;
+ 	assign A=32'h67452301,B=32'hEFCDAB89,C=32'h98BADCFE,D=32'h10325476;
+ 	//trong chuong trinh
     output	logic[31:0] A1,B1,C1,D1,A2,B2,C2,D2,A3,B3,C3,D3,A4,B4,C4,D4;
-	assign A=32'h67452301,B=32'hefcdab89 ,C=32'h98badcfe,D=32'h10325476;
     logic rst1,rst2,rst3;
     logic fl2,fl3,fl4;
 //flag out
 	DffSync_n#(1) Fl_o(0,fl4,rst_o,clk_i,fl_o);
 //executive
+
 	//round 0 
-	computation_n_r#(32,0) R0(A,B,C,D,M_i,K_i[0:15],rst_i,clk_i,fl1,rst1,A1,B1,C1,D1);
+	computation_n_r#(32,0) R0(A,B,C,D,M_io,K_i[0:15],rst_i,clk_i,fl1,rst1,A1,B1,C1,D1);
 	//round 1
-	computation_n_r#(32,1) R1(A1,B1,C1,D1,M_i,K_i[16:31],rst1,clk_i&fl1,fl2,rst2,A2,B2,C2,D2);
+	computation_n_r#(32,1) R1(A1,B1,C1,D1,M_io,K_i[16:31],rst1,clk_i&fl1,fl2,rst2,A2,B2,C2,D2);
 	//round 2
-	computation_n_r#(32,2) R2(A2,B2,C2,D2,M_i,K_i[32:47],rst2,clk_i&fl2,fl3,rst3,A3,B3,C3,D3);
+	computation_n_r#(32,2) R2(A2,B2,C2,D2,M_io,K_i[32:47],rst2,clk_i&fl2,fl3,rst3,A3,B3,C3,D3);
 	//round 3
-	computation_n_r#(32,3) R3(A3,B3,C3,D3,M_i,K_i[48:63],rst3,clk_i&fl3&fl2&fl1,fl4,rst_o,A4,B4,C4,D4);
+	computation_n_r#(32,3) R3(A3,B3,C3,D3,M_io,K_i[48:63],rst3,clk_i&fl3&fl2&fl1,fl4,rst_o,A4,B4,C4,D4);
 //hash
-	logic [3:0] notuse,notuse_o;
-	logic[32:0] Ahash,Bhash,Chash,Dhash;
-	assign Ahash={1'b0,A4}+{1'b0,A};
-	assign Bhash={1'b0,B4}+{1'b0,B};
-	assign Chash={1'b0,C4}+{1'b0,C};
-	assign Dhash={1'b0,D4}+{1'b0,D};
+	logic [7:0] notuse,notuse_o;
+	logic[33:0] Ahash,Bhash,Chash,Dhash;
+	assign Ahash={2'b0,A4}+{2'b0,A};
+	assign Bhash={2'b0,B4}+{2'b0,B};
+	assign Chash={2'b0,C4}+{2'b0,C};
+	assign Dhash={2'b0,D4}+{2'b0,D};
 	assign hash_o={Ahash[31:0],Bhash[31:0],Chash[31:0],Dhash[31:0]};
 	//signal is not used
-	assign notuse={Ahash[32],Bhash[32],Chash[32],Dhash[32]};	
-	DffSync_n#(4) Notuse(notuse,notuse_o,rst_i,clk_i&~fl_o,notuse_o);
+	assign notuse={Ahash[33:32],Bhash[33:32],Chash[33:32],Dhash[33:32]};	
+    DffSync_n#(8) Notuse(notuse,notuse_o,rst_i,clk_i&~fl_o,notuse_o);
 endmodule:md5
 
 
