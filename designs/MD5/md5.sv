@@ -1,8 +1,8 @@
 `include "src/designs/MD5/computation_n_r.sv"
-module md5(M_i,rst_i,clk_i,fl_o,hash_o,A_o,B_o,C_o,D_o,M_io,fl_com,rst_com,fl_start,rst_exe);
+module md5(M_i,rst_i,clk_i,fl_end,hash_o,A_o,B_o,C_o,D_o,M_io,i,r);
 input logic [31:0] M_i; //test 32 bit
 input logic rst_i,clk_i;
-output logic fl_o,fl_com;
+output logic fl_end;
 output logic [127:0] hash_o;
 //setup
 	//K_i
@@ -22,7 +22,7 @@ output	logic[31:0] M_io[0:15];
 	genvar m;
 	generate
 	  	 for(m=0;m<16;m++) begin
-	  		assign	M_io[m]=M_i1[m*32+31:m*32];		  			
+	  		assign	M_io[15-m]=M_i1[m*32+31:m*32];		  			
 	  		end
 	endgenerate
 	//initial A B C D 			      		
@@ -30,24 +30,24 @@ output	logic[31:0] M_io[0:15];
  //	assign A=32'h01234567,B=32'h89abcdef,C=32'hfedcba98,D=32'h76543210;
  	assign A=32'h67452301,B=32'hEFCDAB89,C=32'h98BADCFE,D=32'h10325476;
 //flag out
-	logic fl_main,fl1;
+	logic fl_main,fl1,fl_o;
 	assign fl_main=(r==3)?1:0;
+	assign fl_end=(fl_com|fl1)&fl_o;
 	dff_n_data#(1,0) Fl1(fl_main,rst_i,clk_i,fl1);
 	dff_n#(1) Fl_o(fl1,~rst_com,fl_o);//delay 1 clk de xuat F_o thu 15
 //executive
  output	logic [31:0] A_o,B_o,C_o,D_o;
- 		logic [31:0] A1,B1,C1,D1;
- output  logic rst_com,fl_start,rst_exe;
-	computation_n_r#(32) exe(r,A1,B1,C1,D1,M_io,K_i[0:15],rst_exe,clk_i,rst_com,fl_com,A_o,B_o,C_o,D_o);
+ 	 logic [31:0] A1,B1,C1,D1;
+	 logic rst_com,fl_com,rst_exe;
+	computation_n_r#(32) exe(r,A1,B1,C1,D1,M_io,K_i,rst_exe,clk_i,rst_com,fl_com,A_o,B_o,C_o,D_o);
 	mux2to1_n#(32) a_o(A,A_o,rst_i,A1);
 	mux2to1_n#(32) b_o(B,B_o,rst_i,B1);
     mux2to1_n#(32) c_o(C,C_o,rst_i,C1);
 	mux2to1_n#(32) d_o(D,D_o,rst_i,D1);
 	//round
-	logic[1:0] r;
-	dff_n_data#(2,0) R(r+1,rst_i,fl_com,r);
+output	logic[1:0] r;
+	dff_n_data#(2,0) R(r+1,rst_i,fl_com|fl1,r);
 	//rst_exe
-	assign fl_start=(r==0)?0:1;
 	mux2to1_n#(1) Rst_exe(rst_i,rst_com,rst_i&~fl_o,rst_exe);
 //hash
 	logic [7:0] notuse,notuse_o;
@@ -60,6 +60,9 @@ output	logic[31:0] M_io[0:15];
 	//signal is not used
 	assign notuse={Ahash[33:32],Bhash[33:32],Chash[33:32],Dhash[33:32]};	
     DffSync_n#(8) Notuse(notuse,notuse_o,rst_i,clk_i&~fl_o,notuse_o);
+//i
+output logic[3:0] i;
+	dff_n_data#(4,0) I(i+1,rst_exe,clk_i&~fl_end,i);
 endmodule:md5
 
 
