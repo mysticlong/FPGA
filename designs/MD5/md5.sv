@@ -1,5 +1,5 @@
 `include "src/designs/MD5/computation_n_r.sv"
-module md5(M_i,rst_i,clk_i,fl_o,hash_o,A1,B1,C1,D1,A_o,B_o,C_o,D_o,M_io,fl_com,rst_com,fl_start,rst_exe);
+module md5(M_i,rst_i,clk_i,fl_o,hash_o,A_o,B_o,C_o,D_o,M_io,fl_com,rst_com,fl_start,rst_exe);
 input logic [31:0] M_i; //test 32 bit
 input logic rst_i,clk_i;
 output logic fl_o,fl_com;
@@ -35,13 +35,14 @@ output	logic[31:0] M_io[0:15];
 	dff_n_data#(1,0) Fl1(fl_main,rst_i,clk_i,fl1);
 	dff_n#(1) Fl_o(fl1,~rst_com,fl_o);//delay 1 clk de xuat F_o thu 15
 //executive
- output	logic [31:0] A_o,B_o,C_o,D_o,A1,B1,C1,D1;
+ output	logic [31:0] A_o,B_o,C_o,D_o;
+ 		logic [31:0] A1,B1,C1,D1;
  output  logic rst_com,fl_start,rst_exe;
-	computation_n_r#(32) exe(r,A_o,B_o,C_o,D_o,M_io,K_i[0:15],rst_exe,clk_i,rst_com,fl_com,A1,B1,C1,D1);
-	mux2to1_n#(32) a_o(A,A1,rst_i,A_o);
-	mux2to1_n#(32) b_o(B,B1,rst_i,B_o);
-    mux2to1_n#(32) c_o(C,C1,rst_i,C_o);
-	mux2to1_n#(32) d_o(D,D1,rst_i,D_o);
+	computation_n_r#(32) exe(r,A1,B1,C1,D1,M_io,K_i[0:15],rst_exe,clk_i,rst_com,fl_com,A_o,B_o,C_o,D_o);
+	mux2to1_n#(32) a_o(A,A_o,rst_i,A1);
+	mux2to1_n#(32) b_o(B,B_o,rst_i,B1);
+    mux2to1_n#(32) c_o(C,C_o,rst_i,C1);
+	mux2to1_n#(32) d_o(D,D_o,rst_i,D1);
 	//round
 	logic[1:0] r;
 	dff_n_data#(2,0) R(r+1,rst_i,fl_com,r);
