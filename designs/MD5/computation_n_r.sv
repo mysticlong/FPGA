@@ -1,11 +1,12 @@
 `include "src/library/DffSync_n.sv"
 `include "src/library/dff_n_data.sv"
-module computation_n_r#(parameter n=32,round=0) (A_i,B_i,C_i,D_i,M_i,K_i,rst_i,clk_i,fl_o,rst_o,A_o,B_o,C_o,D_o);
+module computation_n_r#(parameter n=32) (round_i,A_i,B_i,C_i,D_i,M_i,K_i,rst_i,clk_i,rst_o,fl_o,A_o,B_o,C_o,D_o);
 input logic [n-1:0] A_i,B_i,C_i,D_i;
 input logic rst_i,clk_i;
+input logic[1:0] round_i;
 input logic [n-1:0] K_i[0:15],M_i[0:15];
 output logic [n-1:0] A_o,B_o,C_o,D_o;
-output logic fl_o,rst_o;
+output logic rst_o,fl_o;
 logic[3:0] i;
 logic [n-1:0] F1_o,F2_o,F3_o,M0[0:15];
 logic fl_main,rst,clk_o;
@@ -30,25 +31,25 @@ assign clk_o=clk_i&~fl_o;
 	//B_next=F_o
 		logic[3:0] x;//index cua M_i
 		always_comb begin:setup
-			case(round)
+			case(round_i)
 			  0: 	    begin F_o = {2'b0,F0_o}+{2'b0,B_o};
 			  				  s0_i=7;s1_i=12;s2_i=17;s3_i=22;//khoi tao S
 			  				   end
-			  1:		begin F_o = {2'b0,F1_o}+{2'b0,B_o};
+			  2'b01:		begin F_o = {2'b0,F1_o}+{2'b0,B_o};
 			  			      s0_i=5;s1_i=9;s2_i=14;s3_i=20;
 			  			      x=1;
 			  			      for(int y=0;y<16;y++) begin
 			  			      		M0[y]=M_i[x];
 			  			      		x+=5;end
 			  			       end
-			  2:		begin F_o = {2'b0,F2_o}+{2'b0,B_o};
+			  2'b10:		begin F_o = {2'b0,F2_o}+{2'b0,B_o};
 			  				  s0_i=4;s1_i=11;s2_i=16;s3_i=23;
 			  				   x=5;
 			  			      for(int y=0;y<16;y++) begin
 			  			      		M0[y]=M_i[x];
 			  			      		x+=3;end
 			  				   end
-			  3:		begin F_o = {2'b0,F3_o}+{2'b0,B_o};
+			  2'b11:		begin F_o = {2'b0,F3_o}+{2'b0,B_o};
 			  				  s0_i=6;s1_i=10;s2_i=15;s3_i=21; 
 			  				  x=0;
 			  			      for(int y=0;y<16;y++) begin

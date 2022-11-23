@@ -1,8 +1,8 @@
 `include "src/designs/MD5/computation_n_r.sv"
-module md5(M_i,rst_i,clk_i,rst_o,fl_o,fl1,hash_o,A1,B1,C1,D1,A2,B2,C2,D2,A3,B3,C3,D3,A4,B4,C4,D4,M_io);
+module md5(M_i,rst_i,clk_i,fl_o,hash_o,A1,B1,C1,D1,A_o,B_o,C_o,D_o,M_io,fl_com,rst_com,fl_start,rst_exe);
 input logic [31:0] M_i; //test 32 bit
 input logic rst_i,clk_i;
-output logic fl_o,rst_o,fl1;
+output logic fl_o,fl_com;
 output logic [127:0] hash_o;
 //setup
 	//K_i
@@ -17,7 +17,7 @@ output logic [127:0] hash_o;
 	assign K_i[56]=32'h6FA87E4F,K_i[57]=32'hFE2CE6E0,K_i[58]=32'hA3014314,K_i[59]=32'h4E0811A1,K_i[60]=32'hF7537E82,K_i[61]=32'hBD3AF235,K_i[62]=32'h2AD7D2BB,K_i[63]=32'hEB86D391;
 	//M_i
 	logic [511:0] M_i1;
-	output	logic[31:0] M_io[0:15]; 
+output	logic[31:0] M_io[0:15]; 
 	assign M_i1[511:480]=M_i[31:0],M_i1[479:0]=480'hB0;//gan M_i voi 512 bit
 	genvar m;
 	generate
@@ -29,28 +29,32 @@ output logic [127:0] hash_o;
 	logic[31:0] A,B,C,D;
  //	assign A=32'h01234567,B=32'h89abcdef,C=32'hfedcba98,D=32'h76543210;
  	assign A=32'h67452301,B=32'hEFCDAB89,C=32'h98BADCFE,D=32'h10325476;
- 	//trong chuong trinh
-    output	logic[31:0] A1,B1,C1,D1,A2,B2,C2,D2,A3,B3,C3,D3,A4,B4,C4,D4;
-    logic rst1,rst2,rst3;
-    logic fl2,fl3,fl4;
 //flag out
-	DffSync_n#(1) Fl_o(0,fl4,rst_o,clk_i,fl_o);
+	logic fl_main,fl1;
+	assign fl_main=(r==3)?1:0;
+	dff_n_data#(1,0) Fl1(fl_main,rst_i,clk_i,fl1);
+	dff_n#(1) Fl_o(fl1,~rst_com,fl_o);//delay 1 clk de xuat F_o thu 15
 //executive
-	//round 0 
-	computation_n_r#(32,0) R0(A,B,C,D,M_io,K_i[0:15],rst_i,clk_i,fl1,rst1,A1,B1,C1,D1);
-	//round 1
-	computation_n_r#(32,1) R1(A1,B1,C1,D1,M_io,K_i[16:31],rst1,clk_i&fl1,fl2,rst2,A2,B2,C2,D2);
-	//round 2
-	computation_n_r#(32,2) R2(A2,B2,C2,D2,M_io,K_i[32:47],rst2,clk_i&fl2,fl3,rst3,A3,B3,C3,D3);
-	//round 3
-	computation_n_r#(32,3) R3(A3,B3,C3,D3,M_io,K_i[48:63],rst3,clk_i&fl3&fl2&fl1,fl4,rst_o,A4,B4,C4,D4);
+ output	logic [31:0] A_o,B_o,C_o,D_o,A1,B1,C1,D1;
+ output  logic rst_com,fl_start,rst_exe;
+	computation_n_r#(32) exe(r,A_o,B_o,C_o,D_o,M_io,K_i[0:15],rst_exe,clk_i,rst_com,fl_com,A1,B1,C1,D1);
+	mux2to1_n#(32) a_o(A,A1,rst_i,A_o);
+	mux2to1_n#(32) b_o(B,B1,rst_i,B_o);
+    mux2to1_n#(32) c_o(C,C1,rst_i,C_o);
+	mux2to1_n#(32) d_o(D,D1,rst_i,D_o);
+	//round
+	logic[1:0] r;
+	dff_n_data#(2,0) R(r+1,rst_i,fl_com,r);
+	//rst_exe
+	assign fl_start=(r==0)?0:1;
+	mux2to1_n#(1) Rst_exe(rst_i,rst_com,rst_i&~fl_o,rst_exe);
 //hash
 	logic [7:0] notuse,notuse_o;
 	logic[33:0] Ahash,Bhash,Chash,Dhash;
-	assign Ahash={2'b0,A4}+{2'b0,A};
-	assign Bhash={2'b0,B4}+{2'b0,B};
-	assign Chash={2'b0,C4}+{2'b0,C};
-	assign Dhash={2'b0,D4}+{2'b0,D};
+	assign Ahash={2'b0,A1}+{2'b0,A};
+	assign Bhash={2'b0,B1}+{2'b0,B};
+	assign Chash={2'b0,C1}+{2'b0,C};
+	assign Dhash={2'b0,D1}+{2'b0,D};
 	assign hash_o={Ahash[31:0],Bhash[31:0],Chash[31:0],Dhash[31:0]};
 	//signal is not used
 	assign notuse={Ahash[33:32],Bhash[33:32],Chash[33:32],Dhash[33:32]};	
