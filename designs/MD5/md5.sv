@@ -1,6 +1,6 @@
 `include "src/designs/MD5/computation_n_r.sv"
 module md5(M_i,rst_i,clk_i,rst_o,fl_o,fl1,hash_o,A1,B1,C1,D1,A2,B2,C2,D2,A3,B3,C3,D3,A4,B4,C4,D4,M_io);
-input logic [31:0] M_i;
+input logic [31:0] M_i; //test 32 bit
 input logic rst_i,clk_i;
 output logic fl_o,rst_o,fl1;
 output logic [127:0] hash_o;
@@ -17,8 +17,8 @@ output logic [127:0] hash_o;
 	assign K_i[56]=32'h6FA87E4F,K_i[57]=32'hFE2CE6E0,K_i[58]=32'hA3014314,K_i[59]=32'h4E0811A1,K_i[60]=32'hF7537E82,K_i[61]=32'hBD3AF235,K_i[62]=32'h2AD7D2BB,K_i[63]=32'hEB86D391;
 	//M_i
 	logic [511:0] M_i1;
-	assign M_i1[511:480]=M_i[31:0],M_i1[479:0]=480'hB0;
-    output	logic[31:0] M_io[0:15]; 	
+	output	logic[31:0] M_io[0:15]; 
+	assign M_i1[511:480]=M_i[31:0],M_i1[479:0]=480'hB0;//gan M_i voi 512 bit
 	genvar m;
 	generate
 	  	 for(m=0;m<16;m++) begin
@@ -36,7 +36,6 @@ output logic [127:0] hash_o;
 //flag out
 	DffSync_n#(1) Fl_o(0,fl4,rst_o,clk_i,fl_o);
 //executive
-
 	//round 0 
 	computation_n_r#(32,0) R0(A,B,C,D,M_io,K_i[0:15],rst_i,clk_i,fl1,rst1,A1,B1,C1,D1);
 	//round 1
