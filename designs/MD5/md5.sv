@@ -52,7 +52,8 @@ output	logic[31:0] M_io[0:15];
     mux2to1_n#(32) c_o(C,C_o,rst_i,C1);
 	mux2to1_n#(32) d_o(D,D_o,rst_i,D1);
 output	logic [31:0] F0_o,F1_o,F2_o,F3_o,M0[0:15],K_io[0:15];
-output	logic [33:0] F0,F1,F2,F3,F_o;
+output	logic [34:0] F0,F1,F2,F3;
+output logic [33:0]F_o;
 output  logic[4:0] s0;
 	//round
 output	logic[1:0] r;

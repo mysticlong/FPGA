@@ -13,7 +13,8 @@ logic [4:0] s0_i,s1_i,s2_i,s3_i;
 assign clk_o=clk_i&~fl_o;
 //set up 
 output	logic [n-1:0] F0_o,F1_o,F2_o,F3_o,M0[0:15];
-output	logic [n+1:0] F0,F1,F2,F3,F_o;
+output	logic [n+2:0] F0,F1,F2,F3;
+output logic[n+1:0]  F_o;
 	//select s0
 		logic [4:0] s1,s2,s3;
 output		logic [4:0] s0;
@@ -23,10 +24,10 @@ output		logic [4:0] s0;
 		DffSync_n#(5) S0(s3_i,s0,rst_i,clk_i&~fl_o,s3);
 	//Fi=A+K+M+F(B,C,B)
 	//Fi_o=(Fi)<<<s0
-		assign F0=({2'b0,A_o}+{2'b0,K_io[i]}+{2'b0,M_i[i]}+{2'b0,((B_o&C_o)|(~B_o&D_o))}), F0_o=(F0[n-1:0]<<s0)+(F0[n-1:0]>>(n-s0));
-		assign F1=({2'b0,A_o}+{2'b0,K_io[i]}+{2'b0,M0[i]}+{2'b0,((B_o&D_o)|(C_o&~D_o))}),  F1_o=(F1[n-1:0]<<s0)+(F1[n-1:0]>>(n-s0));
-		assign F2=({2'b0,A_o}+{2'b0,K_io[i]}+{2'b0,M0[i]}+{2'b0,(B_o^C_o^D_o)}), 		  F2_o=(F2[n-1:0]<<s0)+(F2[n-1:0]>>(n-s0));
-		assign F3=({2'b0,A_o}+{2'b0,K_io[i]}+{2'b0,M0[i]}+{2'b0,(C_o^(B_o|~D_o))}),	      F3_o=(F3[n-1:0]<<s0)+(F3[n-1:0]>>(n-s0));
+		assign F0=({3'b0,A_o}+{3'b0,K_io[i]}+{3'b0,M_i[i]}+{3'b0,((B_o&C_o)|(~B_o&D_o))}), F0_o=(F0[n-1:0]<<s0)+(F0[n-1:0]>>(n-s0));
+		assign F1=({3'b0,A_o}+{3'b0,K_io[i]}+{3'b0,M0[i]}+{3'b0,((B_o&D_o)|(C_o&~D_o))}),  F1_o=(F1[n-1:0]<<s0)+(F1[n-1:0]>>(n-s0));
+		assign F2=({3'b0,A_o}+{3'b0,K_io[i]}+{3'b0,M0[i]}+{3'b0,(B_o^C_o^D_o)}), 		  F2_o=(F2[n-1:0]<<s0)+(F2[n-1:0]>>(n-s0));
+		assign F3=({3'b0,A_o}+{3'b0,K_io[i]}+{3'b0,M0[i]}+{3'b0,(C_o^(B_o|~D_o))}),	      F3_o=(F3[n-1:0]<<s0)+(F3[n-1:0]>>(n-s0));
 	//F_o=Fi_o+B.
 	//B_next=F_o
 		logic[3:0] x;//index cua M_i
@@ -65,9 +66,9 @@ output		logic [31:0] K_io[0:15];
 		     endcase
 		end	;
     //signal is not used
-    logic [9:0] Fd,Fd_o;
-	assign Fd={F0[n+1:n],F1[n+1:n],F2[n+1:n],F3[n+1:n],F_o[n+1:n]};
-	DffSync_n#(10) fd(Fd,Fd_o,rst_i,clk_i&~fl_o,Fd_o);
+    logic [13:0] Fd,Fd_o;
+	assign Fd={F0[n+2:n],F1[n+2:n],F2[n+2:n],F3[n+2:n],F_o[n+1:n]};
+	DffSync_n#(14) fd(Fd,Fd_o,rst_i,clk_i&~fl_o,Fd_o);
 //flag out
 	logic fl1;
 	assign fl_main=(i==15)?1:0; //fl_main
