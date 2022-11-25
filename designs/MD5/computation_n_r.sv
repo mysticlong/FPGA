@@ -1,6 +1,6 @@
 `include "src/library/DffSync_n.sv"
 `include "src/library/dff_n_data.sv"
-module computation_n_r#(parameter n=32) (round_i,A_i,B_i,C_i,D_i,M_i,K_i,rst_i,clk_i,rst_o,fl_o,A_o,B_o,C_o,D_o,s0,F0,F1,F2,F3,F_o,F0_o,F1_o,F2_o,F3_o,M0,K_io);
+module computation_n_r#(parameter n=32) (round_i,A_i,B_i,C_i,D_i,M_i,K_i,rst_i,clk_i,rst_o,fl_o,A_o,B_o,C_o,D_o,s0,F0,F1,F2,F3,F_o,F0_o,F1_o,F2_o,F3_o,M0,K_io,F_test);
 input logic [n-1:0] A_i,B_i,C_i,D_i;
 input logic rst_i,clk_i;
 input logic[1:0] round_i;
@@ -13,7 +13,7 @@ logic [4:0] s0_i,s1_i,s2_i,s3_i;
 assign clk_o=clk_i&~fl_o;
 //set up 
 output	logic [n-1:0] F0_o,F1_o,F2_o,F3_o,M0[0:15];
-output	logic [n+2:0] F0,F1,F2,F3;
+output	logic [n+2:0] F0,F1,F2,F3,F_test;    assign F_test={3'b0,((B_o&D_o)|(C_o&~D_o))};
 output logic[n+1:0]  F_o;
 	//select s0
 		logic [4:0] s1,s2,s3;
@@ -24,7 +24,7 @@ output		logic [4:0] s0;
 		DffSync_n#(5) S0(s3_i,s0,rst_i,clk_i&~fl_o,s3);
 	//Fi=A+K+M+F(B,C,B)
 	//Fi_o=(Fi)<<<s0
-		assign F0=({3'b0,A_o}+{3'b0,K_io[i]}+{3'b0,M_i[i]}+{3'b0,((B_o&C_o)|(~B_o&D_o))}), F0_o=(F0[n-1:0]<<s0)+(F0[n-1:0]>>(n-s0));
+		assign F0=({3'b0,A_o}+{3'b0,K_io[i]}+{3'b0,M0[i]}+{3'b0,((B_o&C_o)|(~B_o&D_o))}), F0_o=(F0[n-1:0]<<s0)+(F0[n-1:0]>>(n-s0));
 		assign F1=({3'b0,A_o}+{3'b0,K_io[i]}+{3'b0,M0[i]}+{3'b0,((B_o&D_o)|(C_o&~D_o))}),  F1_o=(F1[n-1:0]<<s0)+(F1[n-1:0]>>(n-s0));
 		assign F2=({3'b0,A_o}+{3'b0,K_io[i]}+{3'b0,M0[i]}+{3'b0,(B_o^C_o^D_o)}), 		  F2_o=(F2[n-1:0]<<s0)+(F2[n-1:0]>>(n-s0));
 		assign F3=({3'b0,A_o}+{3'b0,K_io[i]}+{3'b0,M0[i]}+{3'b0,(C_o^(B_o|~D_o))}),	      F3_o=(F3[n-1:0]<<s0)+(F3[n-1:0]>>(n-s0));

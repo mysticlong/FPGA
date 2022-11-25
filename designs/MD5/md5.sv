@@ -1,5 +1,5 @@
 `include "src/designs/MD5/computation_n_r.sv"
-module md5(M_i,rst_i,clk_i,fl_end,hash_o,A_o,B_o,C_o,D_o,i,r,s0,F0,F1,F2,F3,F_o,F0_o,F1_o,F2_o,F3_o,M0,rst_exe,K_io);
+module md5(M_i,rst_i,clk_i,fl_end,hash_o,A_o,B_o,C_o,D_o,i,r,s0,F0,F1,F2,F3,F_o,F0_o,F1_o,F2_o,F3_o,M0,rst_exe,K_io,F_test);
 input logic [31:0] M_i[0:14]; 
 input logic rst_i,clk_i;
 output logic fl_end;
@@ -46,13 +46,13 @@ output	logic[31:0] M_io[0:15];
  output	logic [31:0] A_o,B_o,C_o,D_o;
  	 logic [31:0] A1,B1,C1,D1;
 	 logic rst_com,fl_com;
-	computation_n_r#(32) exe(2'b01,A1,B1,C1,D1,M_io,K_i,rst_exe,clk_i,rst_com,fl_com,A_o,B_o,C_o,D_o,s0,F0,F1,F2,F3,F_o,F0_o,F1_o,F2_o,F3_o,M0,K_io);
+	computation_n_r#(32) exe(2'b01,A1,B1,C1,D1,M_io,K_i,rst_exe,clk_i,rst_com,fl_com,A_o,B_o,C_o,D_o,s0,F0,F1,F2,F3,F_o,F0_o,F1_o,F2_o,F3_o,M0,K_io,F_test);
 	mux2to1_n#(32) a_o(A,A_o,rst_i,A1);
 	mux2to1_n#(32) b_o(B,B_o,rst_i,B1);
     mux2to1_n#(32) c_o(C,C_o,rst_i,C1);
 	mux2to1_n#(32) d_o(D,D_o,rst_i,D1);
 output	logic [31:0] F0_o,F1_o,F2_o,F3_o,M0[0:15],K_io[0:15];
-output	logic [34:0] F0,F1,F2,F3;
+output	logic [34:0] F0,F1,F2,F3,F_test;
 output logic [33:0]F_o;
 output  logic[4:0] s0;
 	//round
