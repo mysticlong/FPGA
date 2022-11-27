@@ -1,14 +1,13 @@
 `include "src/library/dff_n_data.sv"
 `include "src/library/DffSync_n_m.sv"
 `include "src/library/DffSync_n_data.sv"
-
 module FindMinIndex1_n#(parameter n=4,m=10)(data_i,rst_i,clk_i,fl_end,min1_o,min2_o,index_o,i,data_in);
 input logic[n-1:0] data_i[0:9];
 input logic rst_i,clk_i;
 output logic fl_end;
 output logic[n-1:0] min1_o,min2_o;
 output logic [3:0] index_o,data_in;
-
+//so sanh data_in voi min2,tiep tuc so sanh min2 voi min1
 //fl_end 
 	logic fl_main;
 	assign fl_main=(i==(m-1))?1:0;
