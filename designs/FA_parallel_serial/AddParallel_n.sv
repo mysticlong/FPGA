@@ -19,7 +19,7 @@ logic fl_main;
 	assign c_in=0;
  	genvar i;
  	generate //9 bo cong
- 	for (i=0;i<n;i++) begin
+ 	for (i=0;i<n+1;i++) begin
 	FA_1bit S_o(A[i],B[i],c_in[i],sum_o[i],c_o[i]); 
 	end
 	endgenerate
