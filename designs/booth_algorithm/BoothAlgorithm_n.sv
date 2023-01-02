@@ -32,6 +32,8 @@ assign m[n+1:1]=data0_i,m[0]=0,m[2*n+2:n+2]=0;
 	//y_o
 	assign y_o=m_o[2*n+2:1];
 //data1_i
-	dff_n#(n+1) B(data1_i,rst_i,b);
+	DffSync_n#(n+1) B(data1_i,b,rst_i,clk_i&~fl_o,b);	
+
+//	dff_n#(n+1) B(data1_i,rst_i,b);
 	assign b_1=~b+1;
 endmodule:BoothAlgorithm_n

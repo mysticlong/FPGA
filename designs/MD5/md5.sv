@@ -1,4 +1,5 @@
 `include "src/designs/MD5/computation_n_r.sv"
+`include "src/library/DffSync_n_m.sv"
 module md5(M_i,rst_i,clk_i,fl_end,hash_o,A_o,B_o,C_o,D_o,i,r,s0,M0,rst_exe,K_io);
 input logic [31:0] M_i[0:14]; 
 input logic rst_i,clk_i;
@@ -29,9 +30,11 @@ output	logic[31:0] M_io[0:15];
 	  		assign	M_io[15-m]=M_i1[m*32+31:m*32];		  			
 	  		end
 	endgenerate*/
+// dong bo ngo vao
+	    DffSync_n_m#(32,15) m_in(M_i,M_in,rst_i,clk_i&~fl_end,M_in);
 	//M_i
-	logic [31:0]M_io[0:15];
-	assign M_io[0:14]=M_i,M_io[15]=32'hB0;
+	logic [31:0]M_io[0:15],M_in[0:14];
+	assign M_io[0:14]=M_in,M_io[15]=32'hB0;
 	//initial A B C D 			      		
 	logic[31:0] A,B,C,D;
  	assign A=32'h01234567,B=32'h89abcdef,C=32'hfedcba98,D=32'h76543210;

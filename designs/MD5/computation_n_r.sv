@@ -1,4 +1,4 @@
-`include "src/library/DffSync_n.sv"
+//`include "src/library/DffSync_n.sv"
 `include "src/library/dff_n_data.sv"
 module computation_n_r#(parameter n=32) (round_i,A_i,B_i,C_i,D_i,M_i,K_i,rst_i,clk_i,rst_o,fl_o,A_o,B_o,C_o,D_o,s0,M0,K_io);
 input logic [n-1:0] A_i,B_i,C_i,D_i;

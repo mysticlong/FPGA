@@ -1,6 +1,6 @@
 `include "src/library/peasant_multi_nxn.sv"
-`include "src/designs/bai2/check.sv"
-`include "src/designs/bai2/scale_32to16b.sv"
+`include "src/designs/log_base_2/check.sv"
+`include "src/designs/log_base_2/scale_32to16b.sv"
 `include "src/library/DffSync_n_data.sv"
 module log_base2_16bit(data0_i,rst_i,clk_i,fl_end,Ynguyen_o,Ythapphan_o,data_in,i);
 input logic [15:0]data0_i;
