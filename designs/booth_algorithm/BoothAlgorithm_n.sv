@@ -1,6 +1,10 @@
 `include "src/library/DffSync_n.sv"
 `include "src/library/DffSync_n_data.sv"
+<<<<<<< HEAD
 `include "src/library/dff_n_data.sv"
+=======
+//`include "src/library/dff_n_data.sv"
+>>>>>>> 994d8d4 (sha_256 50%)
 module BoothAlgorithm_n#(parameter n=8) (data0_i,data1_i,rst_i,clk_i,fl_o,y_o);
 input logic [n:0] data0_i,data1_i;
 input logic rst_i,clk_i;

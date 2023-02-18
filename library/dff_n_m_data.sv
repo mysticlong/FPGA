@@ -1,4 +1,5 @@
 module dff_n_m_data#(parameter n=4,m=16,value=0)(In_i,rst_i,clk_i,In_o);
+<<<<<<< HEAD
 	input logic [n-1:0] In_i[0:m];
 	input logic	rst_i,clk_i;
 	output logic [n-1:0] In_o[0:m];
@@ -6,6 +7,15 @@ module dff_n_m_data#(parameter n=4,m=16,value=0)(In_i,rst_i,clk_i,In_o);
 	 int i=0;
 	 always_comb begin:ok
 	 for(i=0;i<=m;i++)  Val[i]=value;
+=======
+	input logic [n-1:0] In_i[0:m-1];
+	input logic	rst_i,clk_i;
+	output logic [n-1:0] In_o[0:m-1];
+	 logic[n-1:0] Val[0:m-1];
+	 int i=0;
+	 always_comb begin:ok
+	 for(i=0;i<m;i++)  Val[i]=value;
+>>>>>>> 994d8d4 (sha_256 50%)
 	 end
 	always_ff@(posedge clk_i or negedge rst_i) begin
 	if(!rst_i) 
