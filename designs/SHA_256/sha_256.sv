@@ -29,7 +29,6 @@ assign clk_o=clk_i&~fl_end;
 	dff_n#(1) Fl_o(fl_ext,clk_i,fl_ext_o);
 	DffSync_n#(1) Ena_data(0,~fl_ext|fl_ext_o,rst_i,clk_o,ena_shift);
 //Ki
-//	logic[n-1:0] k_i;
 	K#(n,64) K(rst_i,~ena_shift,k_i);
 //tinh ham hash
 	logic[n-1:0] data_o[0:7];

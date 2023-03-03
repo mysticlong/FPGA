@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-=======
-//`include "src/library/mux2to1_n.sv"
-`include "src/library/dff_n_data.sv"
-
->>>>>>> 994d8d4 (sha_256 50%)
+//`include "src/library/dff_n_data.sv"
 module DffSync_n_data#(parameter n=4,val='0)(data0_i,data1_i,condition_i,rst_i,clk_i,y_o);
 input logic [n-1:0] data0_i,data1_i;
 input logic rst_i,clk_i,condition_i;
