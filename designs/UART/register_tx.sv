@@ -8,7 +8,6 @@ input logic[7:0] data_i;
 input logic rst_i,clk_i,clk_baud,ena_tx;
 output logic data_o,clk_reg;
 logic data_io[0:n-1];
-//assign data_io[0]=0,data_io[1:8]=data_i,data_io[9]=1;
 	always_comb begin:proc
 		if(ena_tx) begin
 			data_io[0]=0;
@@ -41,8 +40,6 @@ output	logic fl_end;
 	assign clk_reg=(i==n)?1:0;
 	//reset
 	dff_n#(1) Rst_reg(~clk_reg,clk_i,rst_reg);
-//	DffSync_n_data#(1,1) Rst_reg(1,rst_reg&rst_I,fl_end,rst_i,clk_i,rst_reg_d);
-//	assign clk_next=~rst_reg|~fl_end;
 	//Register
 	assign	d_i[0:n-2]=d_o[1:n-1],d_i[n-1]=1,data_o=d_o[0];
 	DffSync_n_m#(1,n) register(data_io,d_i,rst_reg&rst_I,clk_baud|~fl_end,d_o); 

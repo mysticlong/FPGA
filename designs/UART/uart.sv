@@ -1,17 +1,19 @@
 `include "src/library/AsynFIFO_n_m.sv"
-`include "src/library/DffSync_n_m.sv"
+//`include "src/library/DffSync_n_m.sv"
 //`include "src/library/dff_n.sv"
 `include "src/designs/UART/register_rx.sv"
 `include "src/designs/UART/register_tx.sv"
-module uart#(parameter n=8,address=3,m=8)(Rx_i,ena_wr_i,wr_i,clk_wr_i,clk_rd_i,clk_i,Tx_o,rd_o,round,fl_full_b,clk_Sync);
+module uart#(parameter n=8,address=3,m=8)(Rx_i,ena_wr_i,wr_i,clk_wr_i,clk_rd_i,clk_i,Tx_o,rd_o,round,fl_full_b,rst_start,clk_Sync);
 input logic Rx_i,ena_wr_i,clk_i,clk_rd_i,clk_wr_i;
 input logic[n-1:0] wr_i;
-output logic Tx_o,clk_Sync;
-output logic [n-1:0] rd_o[0:m-1];
-                                   // toc do baud 115200,clk_i=50MHz
-//Fl_end
+output logic Tx_o,clk_Sync,rst_start;
+output logic [n-1:0] rd_o;
+                                  // toc do baud 115200,clk_i=50MHz
+//rst_start
+	assign rst_start=rst_rx;//bat dau qua trinh nhan
+//Fl_end:ket thuc 1 qua trinh nhan va gui
 	logic fl_end,fl_end_d;
-	dff_n_data#(1,1) Fl_end(~fl_end,rst_rx,~end_reg_tx,fl_end);	
+	dff_n_data#(1,1) Fl_end(~fl_end,rst_rx,~(fl_full_b&end_reg_tx),fl_end);	
 	dff_n#(1) Fl_end_d(fl_end,clk_i,fl_end_d);
 	//ena_wr
 	logic ena_wr_o,s;
@@ -52,7 +54,7 @@ output logic [n-1:0] rd_o[0:m-1];
 output logic fl_full_b;
 	assign ena_wr_b=(round==1)?ena_wr_o:end_reg_rx;
 	assign ena_rd_b=(round==1)?(~ena_wr_b|fl_full_b):(~end_reg_rx|fl_full_b);
-	assign rd_o=data_b;
+	assign rd_o=data_b[0];
 	assign wr_b=(round==1)?wr_i:data_o;
 	assign clk_wr_b=((round==1)?(fl_full_b)?clk_sync_tx:clk_wr_i:clk_save);
 	assign clk_rd_b=((round==1)?clk_sync_tx:clk_rd_i);

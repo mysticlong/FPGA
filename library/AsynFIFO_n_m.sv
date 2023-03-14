@@ -1,7 +1,7 @@
-`include "src/library/dff_n_m_data.sv"
+/*`include "src/library/dff_n_m_data.sv"
 `include "src/library/dff_n.sv"
 `include "src/library/DffSync_n_data.sv"
-`include "src/library/mux2to1_n.sv"
+`include "src/library/mux2to1_n.sv"*/
 module AsynFIFO_n_m#(parameter n=32,address=4,m=16) (wr_i,ena_wr,clk_wr,ena_rd,clk_rd,rst_i,clk_i,data_o,fl_end,fl_full,clk_Sync);
 input logic[n-1:0] wr_i;
 input logic rst_i,clk_i,ena_wr,ena_rd;
