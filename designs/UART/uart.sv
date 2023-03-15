@@ -1,8 +1,11 @@
 `include "src/library/AsynFIFO_n_m.sv"
-//`include "src/library/DffSync_n_m.sv"
-//`include "src/library/dff_n.sv"
 `include "src/designs/UART/register_rx.sv"
 `include "src/designs/UART/register_tx.sv"
+/*`include "src/library/DffSync_n_m.sv"
+`include "src/library/DffSync_n_data.sv"
+`include "src/library/dff_n.sv"
+`include "src/library/mux2to1_n.sv"
+`include "src/library/dff_n_m_data.sv"*/
 module uart#(parameter n=8,address=3,m=8)(Rx_i,ena_wr_i,wr_i,clk_wr_i,clk_rd_i,clk_i,Tx_o,rd_o,round,fl_full_b,rst_start,clk_Sync);
 input logic Rx_i,ena_wr_i,clk_i,clk_rd_i,clk_wr_i;
 input logic[n-1:0] wr_i;

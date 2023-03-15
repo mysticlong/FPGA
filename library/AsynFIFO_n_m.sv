@@ -1,7 +1,7 @@
 /*`include "src/library/dff_n_m_data.sv"
 `include "src/library/dff_n.sv"
 `include "src/library/DffSync_n_data.sv"
-`include "src/library/mux2to1_n.sv"*/
+`include "src/library/mux2to1_n.sv"/*/
 module AsynFIFO_n_m#(parameter n=32,address=4,m=16) (wr_i,ena_wr,clk_wr,ena_rd,clk_rd,rst_i,clk_i,data_o,fl_end,fl_full,clk_Sync);
 input logic[n-1:0] wr_i;
 input logic rst_i,clk_i,ena_wr,ena_rd;
@@ -28,10 +28,10 @@ logic th0,th1,th2;
 		dff_n_data#(1,0) Ena_rd(ena_rd,rst_i,clk_i,ena_rd_o);
 		//flag full
 	  	logic fl_full_o,fl_full_ow,fl_full_or;
-		dff_n_data#(1,0) Fl_full(~fl_full_o,rst_i,cond|th2&ena_rd,fl_full_o); 
+		dff_n_data#(1,0) Fl_full(~fl_full_o,rst_i,cond_io|th2&ena_rd,fl_full_o); 
     	dff_n#(1) Fl_full_or(fl_full_o,clk_rd,fl_full_or);//delay 1 clk_rd
 		dff_n#(1) Fl_full_ow(fl_full_o,clk_Sync,fl_full_ow);//delay 1 clk_wr
-		assign fl_full=fl_full_or|fl_full_ow;
+		assign fl_full=(fl_full_or|fl_full_ow)&fl_full_o&fl_full_ow;
 
 //buffer
 	logic[n-1:0] data_i[0:m-1];
@@ -43,11 +43,10 @@ logic th0,th1,th2;
 	assign rst_I=(ena_wr_o|~ena_wr_od|~fl_full_o)|round_d;
 	//dieu kien cua i	
 	logic[address-1:0] i,i_o;
-
-	 logic cond;
+	 logic cond,cond_io;
 	assign i_o=(th2&~ena_rd_o|th1&ena_rd_o)?(i+1):i;
 	assign	cond=(i=='1)?1:0;
-//	dff_n#(1) Cond_d(cond,clk_Sync,cond_d);
+	assign cond_io=(i_o=='1)?1:0;
 	DffSync_n_data#(address,0) I(i_o,i,cond,rst_i&rst_I,clk_Sync&fl_end,i);
 //r:round=0 ghi,round=1 doc
 	logic round,round_d;
