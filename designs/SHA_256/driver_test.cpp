@@ -75,12 +75,13 @@ int counter = 0;
 int value = 1;
 int position = 0;
 //char arr[81] = {"eb94f2c7d51e989940129ab5f49ffff001d3ae24b1822515151651561516516515545465ghjh25gh"};
-char hex_arr[]={"01000000c39aa0fa65b6c0f6bdae75dd5fe2b934d155235c01f0b6c1b55c664fe98ee8d33af57b65c7f5d74df2b944195d266450dc2309cc190e2dbc00000000f6eaa79f06f42942085a5d5b00000001"}; // chuỗi kí	 tự cần chuyển sang hex
+char hex_arr[]={"01000000c39aa0fa65b6c0f6bdae75dd5fe2b934d155235c01f0b6c1b55c664fe98ee8d33af57b65c7f5d74df2b944195d266450dc2309cc190e2dbc00000000f6eaa79f06f429420affffff00000001 "}; // chuỗi kí	 tự cần chuyển sang hex
 char hex[3]; // biến lưu giá trị hex tạm thời
-
-// chuyển từng bit theo chuẩn UART 10bit
+//char hex_arr[]="01000000c39aa0fa65b6c0f6bdae75dd5fe2b934d155235c01f0b6c1b55c664fe98ee8d33af57 ";
+// chuyển từng bit theo chuẩn UART 10bit,115200 baudrate
+int size = sizeof(hex_arr);
 void set_random(Vtop* dut, vluint64_t sim_unit) {
-    if (sim_unit < 20000 || position > 79) {
+    if (sim_unit < 20000 || position >(size/2-1)) {
         value = 1;
         if ((dut->fl_end) == 0) position = 0;
     } else if (sim_unit % 434 == 0 && sim_unit > 434 * 2) {
@@ -91,12 +92,11 @@ void set_random(Vtop* dut, vluint64_t sim_unit) {
             position++;
         } else {
             int bit_index =8-counter; // vị trí bit cần gửi
-            if (position >= 80) {
+            if (position >= size-1) {
                 value = 1; // đã gửi hết dữ liệu
             } else {
-                // chuyển kí tự thành hex và gán bit tương ứng vào value
-              //  sprintf(hex, "%02x", arr[79 - position]);
-      				  strncpy(hex,&hex_arr[158-position*2], 2);
+              //  sprintf(hex, "%02x", arr[79 - position]);   / chuyển kí tự thành hex và gán bit tương ứng vào value
+      			strncpy(hex,&hex_arr[size-2-position*2], 2);
                 int hex_val = hex[bit_index / 4] - (hex[bit_index / 4] >= 'a' ? 'a' - 10 : '0'); // lấy giá trị hex từ kí tự hex tương ứng
                 value = (hex_val >> (3-bit_index % 4)) & 1; // lấy bit tương ứng từ giá trị hex
             }

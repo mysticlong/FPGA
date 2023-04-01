@@ -2,11 +2,12 @@
 `include "src/designs/SHA_256/decoder.sv"
 `include "src/designs/UART/uart.sv"
 `include "src/library/dff_n.sv"
-module mining(Rx_i,rst_i,clk_i,Tx_o,fl_end,nonce_o);
-input	logic Rx_i,rst_i,clk_i;
+`include "src/library/compare_n.sv"
+module mining(Rx_i,clk_i,Tx_o,fl_end,nonce_o);
+input	logic Rx_i,clk_i;
 output	logic Tx_o,fl_end;
 output logic[31:0] nonce_o;
-parameter n=8,extend=4;
+parameter n=8,extend=4,n_extend=2;
 //module uart
 	logic EnaWrU,clkWrU,clkRdU,FlFullU,rstSyncU,clkSyncU;
     logic roundU;
@@ -72,18 +73,18 @@ parameter n=8,extend=4;
 	decoder#(extend) Decoder(rst_dec&rst_second,clk_i,data_dec);
 	// nonce
 	logic[31:0] nonce;
-	logic	clk_nonce,clk_nonce_o;
+	logic	clk_nonce,clk_nonce_o,sign_sub;
 	logic [extend-1:0] rst_second_o;
 	assign rst_second_o=~data_dec[0];
 	assign clk_nonce_o=clk_nonce&fl_end_main&fl_main_d;
-	DffSync_n#(32) Nonce(w0[2]&0,nonce+1,rst_main,clk_nonce_o,nonce);
-	assign 	nonce_o=nonce+~extend+1;
+	DffSync_n#(32) Nonce(w0[2]&0,nonce+1,rst_main&rstSyncU,clk_nonce_o,nonce);
+	Sub_n#(32)   Nonce_o(0,nonce,extend,clk_i,nonce_o,sign_sub);
 	//w1
 	logic[31:0] w_second[0:15];
 	assign w_second[0:2]=w0[16:18];
 	assign w_second[4]=32'h80000000;//gia tri mac dinh khi khong co chuoi ki tu
 	assign w_second[5:14]=w0[21:30];
-	assign w_second[3]=(fl_main|fl_main_d)?nonce:nonce_o;
+	assign w_second[3]=(fl_main_d)?nonce:nonce_o;
 	assign w_second[15]=w0[31]&0|32'h00000280;;
 	logic[255:0] hash_o_second[0:extend-1];
 	//mo rong bo sha-256
@@ -97,25 +98,22 @@ parameter n=8,extend=4;
 		endgenerate
 //flag end
 	logic fl_main;//=0 khi tim ra nonce
-	logic[255:0] hash_o;
 	logic[255:0] difficult,difficult_shift;
 	assign difficult[255:224]=w0[18]<<8,difficult[223:0]=0;
 	assign difficult_shift=difficult>>(w0[18][31:24]);
+	//so sanh
+	logic smaller_o,equal_o;
+	logic[n_extend-1:0] index;
+	dff_n_data#(n_extend,0) Index(index+1,rst_second_o[0],clk_nonce_o,index);
+	compare_n#(256) Compare(0,hash_o_second[index],difficult_shift,clk_i,smaller_o,equal_o);
+	assign fl_main=(smaller_o|equal_o)? 0:1;
+	//hash_o
+	logic[255:0] hash_o;
+	assign hash_o=(fl_main)?'1:hash_o_second[index];
 	always_comb begin:ok
 		clk_nonce=0;
 		for(int a=0;a<extend;a++) 
-		 begin
 			clk_nonce|=~data_dec[1][a];
-			if(hash_o_second[a]<difficult_shift)
-			 begin
-				hash_o=hash_o_second[a];
-				fl_main=0;
-			 end
-			else begin
-				fl_main=1;
-				 hash_o='1; 
-			end
-		 end
     	end
 //truyen du lieu
 	// rst_shift
@@ -127,10 +125,9 @@ parameter n=8,extend=4;
 	assign empty=(hash_o_shift==0)?0:1;
 	dff_n#(1) Empty_o(empty,clkSyncU,empty_o);
 //not use
-	logic notuse,notuse_o;
-	assign notuse=fl_endBL|fl_fullBL|clk_SyncBL;
-	DffSync_n#(1) NotUse(notuse,notuse_o,rst_i,clk_i,notuse_o);
+	logic notuse;
+	assign notuse=fl_endBL|fl_fullBL|clk_SyncBL|sign_sub;
 //fl_end
-	dff_n_data#(1,1) Fl_end(~fl_end,rstSyncU,~roundU,fl_end);
+	dff_n_data#(1,1) Fl_end(~fl_end|notuse&0,rstSyncU,~roundU,fl_end);
 endmodule:mining
 	
