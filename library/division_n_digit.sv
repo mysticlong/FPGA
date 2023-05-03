@@ -1,6 +1,6 @@
-`include "src/library/DffSync_n.sv"
-`include "src/library/DffSync_n_val.sv"
-module division_n_digit#(parameter n=32,digit=32,index=7)(data0_i,data1_i,rst_i,clk_i,rst_o,fl_end,y_o);
+/*`include "src/library/DffSync_n.sv"
+`include "src/library/DffSync_n_val.sv"*/
+
 input logic [n-1:0] data0_i;
 input logic [n-1+digit:0] data1_i;
 input logic rst_i,clk_i;

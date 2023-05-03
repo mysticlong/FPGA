@@ -17,7 +17,7 @@ logic [n:0] c_o,c_in,data1_o,data0_o,data;
 	// tinh tong
  	genvar i;
  	generate //8 bo cong
- 	for (i=0;i<=n;i++) begin
+ 	for (i=0;i<=n;i++) begin: SUB
 	FA_1bit S_o(data0_o[i],data1_o[i],c_in[i],data[i],c_o[i]); 
 	end
 	endgenerate

@@ -1,5 +1,5 @@
-`include "src/library/dff_n_data.sv"
-module peasant_multi_nxn#(parameter n=16) (data0_i,data1_i,rst_i,clk_i,rst_o,fl_o,y_o);
+//`include "src/library/dff_n_data.sv"
+
 input logic [n-1:0] data0_i,data1_i;
 input logic rst_i,clk_i;
 output logic [2*n-1:0]y_o;

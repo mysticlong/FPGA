@@ -1,4 +1,4 @@
-`include "src/library/mux2to1_n_m.sv"
+//`include "src/library/mux2to1_n_m.sv"
 module dff_n_m_val#(parameter n=4,m=15,value=0)(In_i,rst_i,clk_i,In_o);
 	input logic [n-1:0] In_i[0:m];
 	input logic	rst_i,clk_i;

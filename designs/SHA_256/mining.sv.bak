@@ -1,4 +1,4 @@
-/*`include "src/designs/SHA_256/sha_256.sv"
+`include "src/designs/SHA_256/sha_256.sv"
 `include "src/designs/SHA_256/decoder.sv"
 `include "src/designs/SHA_256/extend_m.sv"
 `include "src/designs/SHA_256/computation.sv"
@@ -18,7 +18,7 @@
 `include "src/library/FA_1bit.sv"
 `include "src/library/dff_n_m_data.sv"
 `include "src/library/DffSync_n_data.sv"
-`include "src/library/compare_n.sv"*/
+`include "src/library/compare_n.sv"
 module mining(Rx_i,clk_i,Tx_o,fl_end);
 input	logic Rx_i,clk_i;
 output	logic Tx_o,fl_end;

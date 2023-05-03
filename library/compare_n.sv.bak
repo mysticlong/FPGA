@@ -1,4 +1,5 @@
 //`include "src/library/Sub_n.sv"
+// (.br_signed(),.rs1_d_i(),.rs2_d_i(),.clk_i(),.br_less_o(),.br_equal_o());
 module compare_n#(parameter n=32)(
 	input logic br_signed, //=0 unsigned
 	input logic[n-1:0] rs1_d_i,
@@ -9,7 +10,13 @@ module compare_n#(parameter n=32)(
 );
 	logic sub_sign,br_less_signed,br_less_unsigned;
 	logic[n-1:0] sub;
-	Sub_n#(n) SUB(br_signed,rs1_d_i,rs2_d_i,clk_i,sub,sub_sign);
+	Sub_n#(n) SUB(.sign_i(br_signed),
+					 .data0_i(rs1_d_i),
+					 .data1_i(rs2_d_i),
+					 .clk_i(clk_i),
+					 .data_o(sub),
+					 .over_o(sub_sign));
+//	(br_signed,rs1_d_i,rs2_d_i,clk_i,sub,sub_sign);
 	assign br_less_signed =(~rs1_d_i[n-1] &  sub_sign |
 					   rs1_d_i[n-1] & ~rs2_d_i[n-1]|
 					   rs1_d_i[n-1] &  rs2_d_i[n-1] & sub_sign  
@@ -18,5 +25,5 @@ module compare_n#(parameter n=32)(
 	//br_less_o
 	assign br_less_o=(!br_signed)?br_less_unsigned:br_less_signed;
 	//br_equal_o
-	assign br_equal_o=(sub==0)?1'b1:1'b0;
+	assign br_equal_o=(sub==0)?1:0;
 endmodule:compare_n

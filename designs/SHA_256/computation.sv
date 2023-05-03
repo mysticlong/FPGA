@@ -14,12 +14,23 @@ output logic [n-1:0] data_o[0:m-1];
 // dong bo ngo vao
 	logic [n-1:0] din[0:m-1];
 	assign din[0]=sum_o[6],din[1:3]=data_o[0:2],din[4]=sum_o[4],din[5:7]=data_o[4:6];
-	DffSync_n_m#(n,m) Din_o(data_i,din,rst_i,clk_i,data_o);
+//	DffSync_n_m#(n,m) Din_o(data_i,din,rst_i,clk_i,data_o);
+	DffSync_n_m#(n,m) Din_o(.data0_i(data_i),
+							.data1_i(din),
+							.rst_i(rst_i|notused&1'b0),
+							.clk_i(clk_i),
+							.y_o(data_o));
+
 //addition modulo
  	genvar i;
  	generate //7 bo cong
- 	for (i=0;i<7;i++) begin
-	add_n#(32) S_o(A[i],B[i],clk_i,sum_o[i],c_o[i]); 
+ 	for (i=0;i<7;i++) begin:ADD_MODULO
+	add_n#(32) S_o(.data0_i(A[i]),
+					.data1_i(B[i]),
+					.clk_i(clk_i),
+					.sum_o(sum_o[i]),
+					.over_o(c_o[i]));
+//	(A[i],B[i],clk_i,sum_o[i],c_o[i]); 
 	end
 	endgenerate
 	logic[n-1:0] A[0:6],B[0:6],sum_o[0:6];
@@ -31,7 +42,7 @@ output logic [n-1:0] data_o[0:m-1];
 	assign A[5]=sum_o[3],B[5]=ma;
 	assign A[6]=sum_o[5],B[6]=sigma_0;
 //signal not use
-	logic notused_o,notused,c_o[0:6];
+	logic notused,c_o[0:6];
 	assign notused=c_o[0]|c_o[1]|c_o[2]|c_o[3]|c_o[4]|c_o[5]|c_o[6];
-	DffSync_n#(1) Notuse(notused,notused_o,rst_i,clk_i,notused_o);
+
 endmodule:computation

@@ -1,9 +1,9 @@
-`include "src/designs/SHA_256/computation.sv"
+/*`include "src/designs/SHA_256/computation.sv"
 `include "src/designs/SHA_256/extend_m.sv"
 `include "src/designs/SHA_256/K.sv"
 `include "src/library/add_n_m.sv"
 `include "src/library/mux2to1_n.sv"
-//`include "src/library/dff_n.sv"
+//`include "src/library/dff_n.sv"*/
 module sha_256#(parameter n=32,m=16,mode=0)(m_i,h_i,rst_i,clk_i,fl_end,hash_out);
 input logic [n-1:0] m_i[0:m-1];
 input logic rst_i,clk_i;
@@ -40,41 +40,85 @@ logic clk_o;
 assign clk_o=clk_i&~fl_end;
 //mo rong m_i
 	logic [n-1:0] w_i[0:m-1];
-  	extend_m#(n,m) W_i(m_i,ena_shift,rst_i,clk_o,fl_ext,w_i);
+  	extend_m#(n,m) W_i(.m_i(m_i),
+  					   .ena_shift(ena_shift),
+  					   .rst_i(rst_i),
+  					   .clk_i(clk_o),
+  					   .fl_end(fl_ext),
+  					   .w_o(w_i));
+ // 	(m_i,ena_shift,rst_i,clk_o,fl_ext,w_i);
 //tao xung cho phep dich
 	logic ena_shift;
 	logic fl_ext,fl_ext_o;
-	dff_n#(1) Fl_o(fl_ext,clk_i,fl_ext_o);
-	DffSync_n#(1) Ena_data(0,~fl_ext|fl_ext_o,rst_i,clk_o,ena_shift);
+	dff_n#(1) Fl_o(.d_i(fl_ext),
+				 .clk_i(clk_i),
+				 .q_o(fl_ext_o));
+//	(fl_ext,clk_i,fl_ext_o);
+	DffSync_n#(1) Ena_data(.data0_i(1'b0),
+						   .data1_i(~fl_ext|fl_ext_o),
+						   .rst_i(rst_i),
+						   .clk_i(clk_o),
+						   .data_o(ena_shift));
+//	(1'b0,~fl_ext|fl_ext_o,rst_i,clk_o,ena_shift);
 //Ki
 	logic[n-1:0] k_i;
-	K#(n,64) K(rst_i,~ena_shift,k_i);
+	K#(n,64) K(.rst_i(rst_i),
+			   .clk_i(~ena_shift),
+			   .data_o(k_i));
+//	(rst_i,~ena_shift,k_i);
 //tinh ham hash
 	logic[n-1:0] data_o[0:7],data_i[0:7];
 	assign data_i=(mode==1)?hash_i_arr:h;
-	computation#(n,8) Data_o(data_i,w_i[0],k_i,rst_i,~ena_shift,data_o);
+	computation#(n,8) Data_o (.data_i(data_i),
+							  .w_i(w_i[0]),
+							  .k_i(k_i),
+							  .rst_i(rst_i),
+							  .clk_i(~ena_shift),
+							  .data_o(data_o));
+//	(data_i,w_i[0],k_i,rst_i,~ena_shift,data_o);
 //gia tri hash
 	logic[n-1:0] hash_second[0:7];
 	logic c_o0[0:7];
 	genvar i;
  	generate //8 bo cong
- 	for (i=0;i<8;i++) begin
-	add_n#(32) Hash((mode==1)?hash_i_arr[i]:h[i],data_o[i],clk_i,hash_second[i],c_o0[i]); 
+ 	for (i=0;i<8;i++) begin:ADD
+	add_n#(32) Hash(.data0_i((mode==1)?hash_i_arr[i]:h[i]),
+					.data1_i(data_o[i]),
+					.clk_i(clk_i),
+					.sum_o(hash_second[i]),
+					.over_o(c_o0[i]));
+//	((mode==1)?hash_i_arr[i]:h[i],data_o[i],clk_i,hash_second[i],c_o0[i]); 
 	end
 	endgenerate
 //not use
-	logic notuse,notuse_o;
-	DffSync_n#(1) Notused(notuse,notuse_o,rst_i,clk_i,notuse_o);
+	logic notuse;
+//	DffSync_n#(1) Notused(notuse,notuse_o,rst_i,clk_i,notuse_o);
 //flag end
 	logic[5:0] i0;
-	DffSync_n#(6) I(0,i0+1,rst_i,~ena_shift&~fl_end,i0);
+	DffSync_n#(6) I(.data0_i(6'b0),
+					.data1_i(i0+6'h1),
+					.rst_i(rst_i),
+					.clk_i(~ena_shift&~fl_end),
+					.data_o(i0));
+//	(6'b0,i0+6'h1,rst_i,~ena_shift&~fl_end,i0);
  	logic	fl_main,fl_main_o;
-	assign fl_main=(i0=='1)?1:0;
-	dff_n#(1)	Fl_main_o(fl_main,~ena_shift,fl_main_o);
-	DffSync_n#(1) Fl_end(0,fl_main_o,rst_i,clk_i,fl_end);
+	assign fl_main=(i0=='1)?1'b1:1'b0;
+	dff_n#(1)	Fl_main_o(.d_i(fl_main|notuse&1'b0),
+						  .clk_i(~ena_shift),
+						  .q_o(fl_main_o));
+//	(fl_main|notuse&1'b0,~ena_shift,fl_main_o);
+//	DffSync_n#(1) Fl_end(1'b0,fl_main_o,rst_i,clk_i,fl_end);
+	DffSync_n#(1) Fl_end(.data0_i(1'b0),
+					.data1_i(fl_main_o),
+					.rst_i(rst_i),
+					.clk_i(clk_i),
+					.data_o(fl_end));
 //hash_o
 		logic[255:0] hash_o;
-		dff_n#(256) Hash(hash_o,fl_main_o,hash_out);
+		dff_n#(256) Hash (.d_i(hash_o),
+						 .clk_i(fl_main_o),
+						 .q_o(hash_out));
+	//	(hash_o,fl_main_o,hash_out);
 	//	assign hash_m={hash_main[7],hash_main[6],hash_main[5],hash_main[4],hash_main[3],hash_main[2],hash_main[1],hash_main[0]};
 		assign hash_o={hash_second[0],hash_second[1],hash_second[2],hash_second[3],hash_second[4],hash_second[5],hash_second[6],hash_second[7]};
 endmodule:sha_256

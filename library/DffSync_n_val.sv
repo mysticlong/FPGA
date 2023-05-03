@@ -1,4 +1,4 @@
-`include "src/library/DffSync_n_data.sv"
+//`include "src/library/DffSync_n_data.sv"
 module DffSync_n_val#(parameter n=5,[n-1:0]val=31)(data0_i,data1_i,condition_i,rst_i,clk_i,y_o);
 input logic [n-1:0] data0_i,data1_i;
 input logic condition_i,rst_i,clk_i;

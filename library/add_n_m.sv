@@ -1,7 +1,7 @@
-`include "src/library/add_n.sv"
+/*`include "src/library/add_n.sv"
 `include "src/library/DffSync_n_m.sv"
 `include "src/library/DffSync_n_data.sv"
-`include "src/library/dff_n_m_data.sv"
+`include "src/library/dff_n_m_data.sv"*/
 module add_n_m#(parameter n=32,m=4)(data_i,rst_i,clk_i,sum_o,c_o,fl_end);
 input logic[n-1:0] data_i[0:m-1];
 input logic rst_i,clk_i;
@@ -9,8 +9,8 @@ output logic[n-1:0] sum_o;
 output logic c_o,fl_end;
 //fl_end 
 	logic fl_main;
-	assign fl_main=(empty_o[m-1]==0)?1:0; //fl_main
-	DffSync_n_data#(1,0) Fl_o(0,fl_main,rst_i,rst_i,clk_i,fl_end);
+	assign fl_main=(empty_o[m-1]==0)?1'b1:1'b0; //fl_main
+	DffSync_n_data#(1,0) Fl_o(1'b0,fl_main,rst_i,rst_i,clk_i,fl_end);
 //dong bo ngo vao
 	logic [n-1:0] data_o[0:m-1],data_shift[0:m-1];
 	assign data_shift[0]=0,data_shift[1:m-1]=data_o[0:m-2];
